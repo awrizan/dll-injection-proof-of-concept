@@ -7,7 +7,7 @@
 INT findProcId(const WCHAR* name) {
 
 	INT pid{};
-	PROCESSENTRY32 procEntry;
+	PROCESSENTRY32 procEntry{};
 	HANDLE hSnap{};
 	HANDLE hToken{};
 
