@@ -48,27 +48,50 @@ INT injectToProc(INT procId) {
 
 	const char* dllPath{ "C:\\yourpath"};
 
-	HINSTANCE dll{ LoadLibraryA(dllPath) };
-	if (dll == 0)
-		return -2;
+	fseek(dllFile, 0, SEEK_END);
+
+	long dllSize{ ftell(dllFile) };
+
+	fseek(dllFile, 0, SEEK_SET);
+	
+	BYTE* dllContent{ new BYTE[dllSize] };
+
+	fread(dllContent, 1, dllSize, dllFile);
+
+	fclose(dllFile);
+
+	SIZE_T buffSize{ (SIZE_T)dllSize };
 
 	SIZE_T buffSize{ 15000 };
 	
-	HANDLE procHandle{ OpenProcess(PROCESS_ALL_ACCESS, FALSE, (DWORD)procId) };
-
 	LPVOID remoteBuff{ VirtualAllocEx(procHandle, NULL, buffSize, MEM_COMMIT, PAGE_EXECUTE_READWRITE) };
-	if (remoteBuff == 0)
+	if (remoteBuff == 0) {
+		delete[] dllContent;
+		CloseHandle(procHandle);
 		return -3;
+	}
+		
 
-	BOOL writeMem{ WriteProcessMemory(procHandle, remoteBuff, dll, buffSize, NULL) };
-	if (!writeMem)
+	BOOL writeMem{ WriteProcessMemory(procHandle, remoteBuff, dllContent, buffSize, NULL) };
+	if (!writeMem) {
+		delete[] dllContent;
+		CloseHandle(procHandle);
+		VirtualFreeEx(procHandle, remoteBuff, 0, MEM_RELEASE);
 		return -4;
+	}
+		
 
 	HANDLE remoteThread{ CreateRemoteThread(procHandle, NULL, 0, (LPTHREAD_START_ROUTINE)loadLibary , remoteBuff,0 , NULL ) };
-	if (remoteThread == NULL)
+	if (remoteThread == NULL) {
+		delete[] dllContent;
+		CloseHandle(procHandle);
+		VirtualFreeEx(procHandle, remoteBuff, 0, MEM_RELEASE);
 		return -5;
+	}
 
-	WaitForSingleObject(dll, INFINITE);
+	WaitForSingleObject(remoteThread, INFINITE);
+
+	delete[] dllContent;
 
 	CloseHandle(remoteThread);
 
