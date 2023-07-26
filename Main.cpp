@@ -20,7 +20,7 @@ INT findProcId(const WCHAR* name) {
 	if (INVALID_HANDLE_VALUE == hSnap) {
 		return -1;
 	}
-
+	
 	if (!bSnap) {
 		return -1;
 	}
@@ -55,7 +55,6 @@ INT injectToProc(INT procId) {
 	fseek(dllFile, 0, SEEK_SET);
 	
 	BYTE* dllContent{ new BYTE[dllSize] };
-
 	if(dllContent == NULL){
 		delete[] dllContent;
 		return -2
