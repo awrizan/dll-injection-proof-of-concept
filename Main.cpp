@@ -56,6 +56,11 @@ INT injectToProc(INT procId) {
 	
 	BYTE* dllContent{ new BYTE[dllSize] };
 
+	if(dllContent == NULL){
+		delete[] dllContent;
+		return -2
+	}
+
 	fread(dllContent, 1, dllSize, dllFile);
 
 	fclose(dllFile);
