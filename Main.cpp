@@ -46,27 +46,11 @@ INT injectToProc(INT procId) {
 
 	LPVOID loadLibary{ GetProcAddress(hKern, "LoadLibaryA") };
 
-	const char* dllPath{ "C:\\yourpath"};
+	const char* dllFile{ "C:\\yourpath"};
 
-	fseek(dllFile, 0, SEEK_END);
 
-	long dllSize{ ftell(dllFile) };
 
-	fseek(dllFile, 0, SEEK_SET);
-	
-	BYTE* dllContent{ new BYTE[dllSize] };
-	if(dllContent == NULL){
-		delete[] dllContent;
-		return -2
-	}
-
-	fread(dllContent, 1, dllSize, dllFile);
-
-	fclose(dllFile);
-
-	SIZE_T buffSize{ (SIZE_T)dllSize };
-
-	SIZE_T buffSize{ 15000 };
+	SIZE_T buffSize{ sizeof(dllFile) };
 	
 	LPVOID remoteBuff{ VirtualAllocEx(procHandle, NULL, buffSize, MEM_COMMIT, PAGE_EXECUTE_READWRITE) };
 	if (remoteBuff == 0) {
